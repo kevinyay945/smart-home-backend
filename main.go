@@ -40,7 +40,11 @@ func main() {
 	e.GET("/commands", func(c echo.Context) error {
 		return c.JSON(http.StatusOK, HttpSuccessResponse{
 			Status: "success",
-			Data: allCommand,
+			Data: struct {
+				Commands []Command `json:"commands"`
+			}{
+				Commands: allCommand,
+			},
 		})
 	})
 
@@ -58,7 +62,9 @@ func main() {
 		input.UpdateAt = time.Now()
 	return c.JSON(http.StatusOK, HttpSuccessResponse{
 			Status: "success",
-			Data: input,
+			Data: struct {
+				Command Command `json:"command"`
+			}{Command: *input},
 		})
 	})
 
@@ -76,7 +82,11 @@ func main() {
 		}
 		return c.JSON(http.StatusOK, HttpSuccessResponse{
 			Status: "success",
-			Data: output,
+			Data: struct {
+				Command Command `json:"command"`
+			}{
+				Command: *output,
+			},
 		})
 	})
 
