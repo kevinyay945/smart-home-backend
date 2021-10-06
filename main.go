@@ -1,36 +1,19 @@
 package main
 
 import (
-	"fmt"
 	"github.com/google/uuid"
 	"net/http"
+	"smart-home-backend/model"
 	"time"
 
 	"github.com/labstack/echo"
 )
 
 type HttpSuccessResponse struct {
-	Status string `json:"status"`
-	Data interface{} `json:"data"`
+	Status string      `json:"status"`
+	Data   interface{} `json:"data"`
 }
 
-type Command struct {
-	Uuid string `json:"uuid"`
-	CreateAt time.Time `json:"createAt"`
-	UpdateAt time.Time `json:"updateAt"`
-	Url string `json:"url"`
-}
-var allCommand []Command = []Command{{
-				"bbbad37f-c6cd-47f7-907d-add1c4045559",
-				time.Now(),
-				time.Now(),
-				"http://example.com",
-			},{
-			"bbbad37f-c6cd-47f7-907d-add1c4045558",
-			time.Now(),
-			time.Now(),
-			"http://example2.com",
-			}}
 func main() {
 	e := echo.New()
 	e.GET("/", func(c echo.Context) error {
@@ -38,18 +21,22 @@ func main() {
 	})
 
 	e.GET("/commands", func(c echo.Context) error {
+		var output []model.Command
+		command := model.NewCommand()
+		output = command.Get()
 		return c.JSON(http.StatusOK, HttpSuccessResponse{
 			Status: "success",
 			Data: struct {
-				Commands []Command `json:"commands"`
+				Commands []model.Command `json:"commands"`
 			}{
-				Commands: allCommand,
+				Commands: output,
 			},
 		})
 	})
 
 	e.POST("/commands", func(c echo.Context) error {
-		input := new(Command)
+		command := model.NewCommand()
+		input := new(model.Command)
 		if err := c.Bind(input); err != nil {
 			return c.String(http.StatusBadRequest, "Fail to Bind Data")
 		}
@@ -60,77 +47,59 @@ func main() {
 		input.Uuid = _uuid.String()
 		input.CreateAt = time.Now()
 		input.UpdateAt = time.Now()
-	return c.JSON(http.StatusOK, HttpSuccessResponse{
+		result := command.Save(input)
+		return c.JSON(http.StatusOK, HttpSuccessResponse{
 			Status: "success",
 			Data: struct {
-				Command Command `json:"command"`
-			}{Command: *input},
+				Command model.Command `json:"command"`
+			}{Command: result},
 		})
 	})
 
 	e.PUT("/commands/:uuid", func(c echo.Context) error {
-		input := new(Command)
+		command := model.NewCommand()
+		input := new(model.Command)
 		if err := c.Bind(input); err != nil {
 			return c.String(http.StatusBadRequest, "Fail to Bind Data")
 		}
 		commandUuid := c.Param("uuid")
-		output := new(Command)
-		for _, command := range allCommand {
-			if commandUuid == command.Uuid {
-				output = &command
-			}
-		}
+		result := command.UpdateOne(commandUuid, command)
 		return c.JSON(http.StatusOK, HttpSuccessResponse{
 			Status: "success",
 			Data: struct {
-				Command Command `json:"command"`
+				Command model.Command `json:"command"`
 			}{
-				Command: *output,
+				Command: result,
 			},
 		})
 	})
 
 	e.DELETE("/commands/:uuid", func(c echo.Context) error {
-		requestUuid := c.Param("uuid")
-		fmt.Println("Delete uuid", requestUuid)
+		command := model.NewCommand()
+		commandUuid := c.Param("uuid")
+		_ = command.Delete(commandUuid)
 		return c.JSON(http.StatusOK, HttpSuccessResponse{
 			Status: "success",
-			Data: nil,
+			Data:   nil,
 		})
 	})
 
-	type Request struct {
-		Uuid string `json:"uuid"`
-		CreateAt time.Time `json:"createAt"`
-		UpdateAt time.Time `json:"updateAt"`
-		Name string `json:"name"`
-	}
-
-	var allRequest []Request = []Request{{
-		"324e672e-3512-41b0-97dc-065c334f8f7a",
-		time.Now(),
-		time.Now(),
-		"Request 1",
-	},{
-		"6737a85c-3ea4-48ed-bfed-4bdff74b189b",
-		time.Now(),
-		time.Now(),
-		"Request 2",
-	}}
-
 	e.GET("/requests", func(c echo.Context) error {
+		request := model.NewRequest()
+		result := request.Get()
 		return c.JSON(http.StatusOK, HttpSuccessResponse{
 			Status: "success",
 			Data: struct {
-				Request []Request `json:"requests"`
+				Request []model.Request `json:"requests"`
 			}{
-				Request: allRequest,
+				Request: result,
 			},
 		})
 	})
 
 	e.POST("/requests", func(c echo.Context) error {
-		input := new(Request)
+		request := model.NewRequest()
+		input := new(model.Request)
 		if err := c.Bind(input); err != nil {
 			return c.String(http.StatusBadRequest, "Fail to Bind Data")
 		}
@@ -141,45 +110,40 @@ func main() {
 		input.Uuid = _uuid.String()
 		input.CreateAt = time.Now()
 		input.UpdateAt = time.Now()
+		result := request.Save(input)
 		return c.JSON(http.StatusOK, HttpSuccessResponse{
 			Status: "success",
 			Data: struct {
-				Request Request `json:"request"`
-			}{Request: *input},
+				Request model.Request `json:"request"`
+			}{Request: result},
 		})
 	})
 
 	e.PUT("/requests/:uuid", func(c echo.Context) error {
-		input := new(Request)
+		request := model.NewRequest()
+		input := new(model.Request)
 		if err := c.Bind(input); err != nil {
 			return c.String(http.StatusBadRequest, "Fail to Bind Data")
 		}
 		requestUuid := c.Param("uuid")
-		output := new(Request)
-		for _, request := range allRequest {
-			if requestUuid == request.Uuid {
-				output.Uuid = request.Uuid
-				output.CreateAt = request.CreateAt
-				output.Name = input.Name
-				output.UpdateAt = time.Now()
-			}
-		}
+		result := request.Update(requestUuid, request)
 		return c.JSON(http.StatusOK, HttpSuccessResponse{
 			Status: "success",
 			Data: struct {
-				Request Request `json:"request"`
+				Request model.Request `json:"request"`
 			}{
-				Request: *output,
+				Request: result,
 			},
 		})
 	})
 
 	e.DELETE("/requests/:uuid", func(c echo.Context) error {
+		request := model.NewRequest()
 		commandUuid := c.Param("uuid")
-		fmt.Println("Delete uuid", commandUuid)
+		_ = request.Delete(commandUuid)
 		return c.JSON(http.StatusOK, HttpSuccessResponse{
 			Status: "success",
-			Data: nil,
+			Data:   nil,
 		})
 	})
 	e.Logger.Fatal(e.Start(":1323"))
