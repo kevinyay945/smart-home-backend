@@ -5,6 +5,15 @@ import (
 	"time"
 )
 
+type ICommand interface {
+	Get() []Command
+	Save(input *Command) Command
+	UpdateOne(commandUuid string, command *Command) Command
+	Delete(commandUuid string) Command
+}
+
+type MCommand struct{}
+
 type Command struct {
 	Uuid string `json:"uuid"`
 	CreateAt time.Time `json:"createAt"`
@@ -24,20 +33,20 @@ var AllCommand []Command = []Command{{
 	"http://example2.com",
 }}
 
-func NewCommand() *Command {
-	output := new(Command)
+func NewCommand() *MCommand {
+	output := new(MCommand)
 	return output
 }
 
-func (c *Command) Get() []Command {
+func (c *MCommand) Get() []Command {
 	return AllCommand
 }
 
-func (c *Command) Save(input *Command) Command {
+func (c *MCommand) Save(input *Command) Command {
 	return *input
 }
 
-func (c *Command) UpdateOne(commandUuid string, command *Command) Command {
+func (c *MCommand) UpdateOne(commandUuid string, command *Command) Command {
 	output := new(Command)
 	for _, command := range AllCommand {
 		if commandUuid == command.Uuid {
@@ -47,7 +56,8 @@ func (c *Command) UpdateOne(commandUuid string, command *Command) Command {
 	return *output
 }
 
-func (c *Command) Delete(commandUuid string) Command {
+func (c *MCommand) Delete(commandUuid string) Command {
 	fmt.Println("Delete uuid", commandUuid)
 	return Command{}
 }
+

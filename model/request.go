@@ -5,6 +5,15 @@ import (
 	"time"
 )
 
+type IRequest interface {
+	Get() []Request
+	Save(input *Request) Request
+	Update(requestUuid string, input *Request) Request
+	Delete(commandUuid string) Request
+}
+
+type MRequest struct {}
+
 type Request struct {
 	Uuid string `json:"uuid"`
 	CreateAt time.Time `json:"createAt"`
@@ -24,20 +33,20 @@ var AllRequest []Request = []Request{{
 	"Request 2",
 }}
 
-func NewRequest() *Request {
-	output := new(Request)
+func NewRequest() *MRequest {
+	output := new(MRequest)
 	return output
 }
 
-func (r *Request) Get() []Request {
+func (r *MRequest) Get() []Request {
 	return AllRequest
 }
 
-func (r *Request) Save(input *Request) Request {
+func (r *MRequest) Save(input *Request) Request {
 	return *input
 }
 
-func (r *Request) Update(requestUuid string, input *Request) Request {
+func (r *MRequest) Update(requestUuid string, input *Request) Request {
 	output := new(Request)
 	for _, request := range AllRequest {
 		if requestUuid == request.Uuid {
@@ -51,7 +60,8 @@ func (r *Request) Update(requestUuid string, input *Request) Request {
 	return Request{}
 }
 
-func (r *Request) Delete(commandUuid string) Request {
+func (r *MRequest) Delete(commandUuid string) Request {
 	fmt.Println("Delete uuid", commandUuid)
 	return Request{}
 }
+
