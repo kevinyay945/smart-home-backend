@@ -51,7 +51,7 @@ func (v *Version1) UpdateCommandByUUID(ctx echo.Context) error {
 		return ctx.String(http.StatusBadRequest, "Fail to Bind Data")
 	}
 	commandUuid := ctx.Param("uuid")
-	result := command.UpdateOne(commandUuid, command)
+	result := command.UpdateOne(commandUuid, input)
 	return ctx.JSON(http.StatusOK, HttpSuccessResponse{
 		Status: "success",
 		Data: struct {
