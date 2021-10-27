@@ -9,8 +9,11 @@ import (
 )
 
 func (v *Version1) GetRequests(ctx echo.Context) error {
-	request := model.NewRequest()
-	result := request.Get()
+	request := model.NewDefaultRequest()
+	result, getErr := request.Get()
+	if getErr != nil {
+		return ctx.JSON(http.StatusInternalServerError, getErr.Error())
+	}
 	return ctx.JSON(http.StatusOK, HttpSuccessResponse{
 		Status: "success",
 		Data: struct {
@@ -22,7 +25,7 @@ func (v *Version1) GetRequests(ctx echo.Context) error {
 }
 
 func (v *Version1) CreateRequest(ctx echo.Context) error {
-	request := model.NewRequest()
+	request := model.NewDefaultRequest()
 	input := new(model.Request)
 	if err := ctx.Bind(input); err != nil {
 		return ctx.String(http.StatusBadRequest, "Fail to Bind Data")
@@ -44,7 +47,7 @@ func (v *Version1) CreateRequest(ctx echo.Context) error {
 }
 
 func (v *Version1) UpdateRequestByUUID(ctx echo.Context) error {
-	request := model.NewRequest()
+	request := model.NewDefaultRequest()
 	input := new(model.Request)
 	if err := ctx.Bind(input); err != nil {
 		return ctx.String(http.StatusBadRequest, "Fail to Bind Data")
@@ -62,7 +65,7 @@ func (v *Version1) UpdateRequestByUUID(ctx echo.Context) error {
 }
 
 func (v *Version1) DeleteRequestByUUID(ctx echo.Context) error {
-	request := model.NewRequest()
+	request := model.NewDefaultRequest()
 	commandUuid := ctx.Param("uuid")
 	_ = request.Delete(commandUuid)
 	return ctx.JSON(http.StatusOK, HttpSuccessResponse{

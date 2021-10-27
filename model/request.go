@@ -2,6 +2,7 @@ package model
 
 import (
 	"fmt"
+	"gorm.io/gorm"
 	"time"
 )
 
@@ -12,13 +13,19 @@ type IRequest interface {
 	Delete(commandUuid string) Request
 }
 
-type MRequest struct {}
+type MRequest struct {
+	db *gorm.DB
+}
 
 type Request struct {
 	Uuid string `json:"uuid"`
 	CreateAt time.Time `json:"createAt"`
 	UpdateAt time.Time `json:"updateAt"`
 	Name string `json:"name"`
+}
+
+func (Request)tableName() string {
+	return "requests"
 }
 
 var AllRequest []Request = []Request{{
@@ -33,13 +40,22 @@ var AllRequest []Request = []Request{{
 	"Request 2",
 }}
 
-func NewRequest() *MRequest {
+func NewRequest(_db *gorm.DB) *MRequest {
 	output := new(MRequest)
+	output.db = _db
 	return output
 }
 
-func (r *MRequest) Get() []Request {
-	return AllRequest
+func NewDefaultRequest() *MRequest {
+	return NewRequest(db)
+}
+
+func (r *MRequest) Get() (requests []Request, err error) {
+	if findErr := r.db.Find(&requests).Error; findErr != nil {
+		err = findErr
+		return
+	}
+	return
 }
 
 func (r *MRequest) Save(input *Request) Request {
