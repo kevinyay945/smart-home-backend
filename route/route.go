@@ -6,7 +6,7 @@ import (
 )
 
 func NewVersion1() v1.IRoute {
-	request := model.NewDefaultRequest()
+	request := model.NewRequest()
 	command := model.NewCommand()
 	return v1.New(request, command)
 }

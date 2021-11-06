@@ -40,14 +40,14 @@ var AllRequest []Request = []Request{{
 	"Request 2",
 }}
 
-func NewRequest(_db *gorm.DB) *MRequest {
+func NewOriginRequest(_db *gorm.DB) *MRequest {
 	output := new(MRequest)
 	output.db = _db
 	return output
 }
 
-func NewDefaultRequest() *MRequest {
-	return NewRequest(db)
+func NewRequest() *MRequest {
+	return NewOriginRequest(db)
 }
 
 func (r *MRequest) Get() (requests []Request, err error) {

@@ -2,6 +2,7 @@ package model
 
 import (
 	"fmt"
+	"gorm.io/gorm"
 	"time"
 )
 
@@ -12,7 +13,9 @@ type ICommand interface {
 	Delete(commandUuid string) Command
 }
 
-type MCommand struct{}
+type MCommand struct{
+	db *gorm.DB
+}
 
 type Command struct {
 	Uuid string `json:"uuid"`
@@ -33,9 +36,14 @@ var AllCommand []Command = []Command{{
 	"http://example2.com",
 }}
 
-func NewCommand() *MCommand {
+func NewOriginCommand(_db *gorm.DB) *MCommand {
 	output := new(MCommand)
+	output.db = _db
 	return output
+}
+
+func NewCommand() *MCommand {
+	return NewOriginCommand(db)
 }
 
 func (c *MCommand) Get() []Command {
