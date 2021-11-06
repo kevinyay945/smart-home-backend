@@ -1,19 +1,25 @@
 package main
 
 import (
+	"fmt"
+	_ "github.com/joho/godotenv/autoload"
 	"github.com/labstack/echo/v4"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"net/http"
+	"os"
 	"smart-home-backend/model"
 	"smart-home-backend/route"
+	"time"
 )
 
 func init() {
 	for {
-		dsn := "postgres://dsjsenja:tMheNWxbf3b5U7xL65XjKiouKTP_1CXd@satao.db.elephantsql.com/dsjsenja"
+		fmt.Printf("PG_URL => %v \n", os.Getenv("PG_URL"))
+		dsn := os.Getenv("PG_URL")
 		db, dbErr := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 		if dbErr != nil {
+			time.Sleep(3*time.Second)
 			continue
 		}
 		model.Init(db)
