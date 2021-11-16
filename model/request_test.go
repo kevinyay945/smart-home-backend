@@ -24,13 +24,11 @@ var _ = Describe("request model", func() {
 		Expect(err).ShouldNot(HaveOccurred())
 	})
 
-	It("should get 0 if amount is 0", func() {
+	It("should select all request in database", func() {
 		const sqlSelectAll = `SELECT * FROM "requests"`
-		mock.ExpectQuery(regexp.QuoteMeta(sqlSelectAll)).
-			WillReturnRows(sqlmock.NewRows(nil))
-		requests, err := r.Get()
+		mock.ExpectQuery(regexp.QuoteMeta(sqlSelectAll))
+		_, err := r.Get()
 		Expect(err).ShouldNot(HaveOccurred())
-		Expect(requests).Should(BeEmpty())
 	})
 })
 
