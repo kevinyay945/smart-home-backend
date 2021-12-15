@@ -37,7 +37,7 @@ func (v *Version1) CreateRequest(ctx echo.Context) error {
 	input.Uuid = _uuid.String()
 	input.CreateAt = time.Now()
 	input.UpdateAt = time.Now()
-	result := request.Save(input)
+	result, _ := request.Save(input)
 	return ctx.JSON(http.StatusOK, HttpSuccessResponse{
 		Status: "success",
 		Data: struct {
@@ -53,7 +53,7 @@ func (v *Version1) UpdateRequestByUUID(ctx echo.Context) error {
 		return ctx.String(http.StatusBadRequest, "Fail to Bind Data")
 	}
 	requestUuid := ctx.Param("uuid")
-	result := request.Update(requestUuid, input)
+	result, err := request.Update(requestUuid, input)
 	return ctx.JSON(http.StatusOK, HttpSuccessResponse{
 		Status: "success",
 		Data: struct {
@@ -67,7 +67,10 @@ func (v *Version1) UpdateRequestByUUID(ctx echo.Context) error {
 func (v *Version1) DeleteRequestByUUID(ctx echo.Context) error {
 	request := model.NewRequest()
 	commandUuid := ctx.Param("uuid")
-	_ = request.Delete(commandUuid)
+	err := request.Delete(commandUuid)
+	if err != nil {
+		return ctx.JSON(http.StatusBadRequest, err.Error())
+	}
 	return ctx.JSON(http.StatusOK, HttpSuccessResponse{
 		Status: "success",
 		Data:   nil,

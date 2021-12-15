@@ -9,38 +9,38 @@ type HttpSuccessResponse struct {
 	Status string      `json:"status"`
 	Data   interface{} `json:"data"`
 }
+type HttpFailResponse struct {
+	Status string      `json:"status"`
+	Errors []HttpError `json:"errors"`
+}
+type HttpError struct {
+	Name string `json:"name"`
+	Reason string `json:"reason"`
+}
 
 type IRoute interface {
 	SetRoute(g *echo.Group)
-	GetCommands(ctx echo.Context) error
-	CreateCommand(ctx echo.Context) error
-	UpdateCommandByUUID(ctx echo.Context) error
-	DeleteCommandByUUID(ctx echo.Context) error
-	GetRequests(ctx echo.Context) error
-	CreateRequest(ctx echo.Context) error
-	UpdateRequestByUUID(ctx echo.Context) error
-	DeleteRequestByUUID(ctx echo.Context) error
 }
 
 type Version1 struct {
-	Request *model.MRequest
-	Command *model.MCommand
+	Request model.IRequest
+	Command model.ICommand
 }
 
-func New(request *model.MRequest, command *model.MCommand) IRoute {
+func New(input Version1) IRoute {
 	r := new(Version1)
-	r.Request = request
-	r.Command = command
+	r.Request = input.Request
+	r.Command = input.Command
 	return r
 }
 
 func (v *Version1) SetRoute(g *echo.Group) {
-	g.GET("/command", v.GetCommands)
-	g.POST("/command", v.CreateCommand)
-	g.PUT("/command/:uuid", v.UpdateCommandByUUID)
-	g.DELETE("/command/:uuid", v.DeleteCommandByUUID)
-	g.GET("/request", v.GetRequests)
-	g.POST("/request", v.CreateRequest)
-	g.PUT("/request/:uuid", v.UpdateRequestByUUID)
-	g.DELETE("/request/:uuid", v.DeleteRequestByUUID)
+	g.GET("/commands", v.GetCommands)
+	g.POST("/commands", v.CreateCommand)
+	g.PUT("/commands/:uuid", v.UpdateCommandByUUID)
+	g.DELETE("/commands/:uuid", v.DeleteCommandByUUID)
+	g.GET("/requests", v.GetRequests)
+	g.POST("/requests", v.CreateRequest)
+	g.PUT("/requests/:uuid", v.UpdateRequestByUUID)
+	g.DELETE("/requests/:uuid", v.DeleteRequestByUUID)
 }

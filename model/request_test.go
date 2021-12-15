@@ -6,7 +6,6 @@ import (
 	. "github.com/onsi/gomega"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"regexp"
 )
 
 var _ = Describe("request model", func() {
@@ -25,8 +24,8 @@ var _ = Describe("request model", func() {
 	})
 
 	It("should select all request in database", func() {
-		const sqlSelectAll = `SELECT * FROM "requests"`
-		mock.ExpectQuery(regexp.QuoteMeta(sqlSelectAll)).WillReturnRows(sqlmock.NewRows(nil))
+		const sqlSelectAll = `SELECT \* FROM "requests"`
+		mock.ExpectQuery(sqlSelectAll).WillReturnRows(sqlmock.NewRows(nil))
 		_, err := r.Get()
 		Expect(err).ShouldNot(HaveOccurred())
 	})

@@ -4,24 +4,17 @@ import (
 	"fmt"
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/labstack/echo/v4"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
 	"net/http"
 	"os"
+	"smart-home-backend/lib/pq"
 	"smart-home-backend/model"
 	"smart-home-backend/route"
-	"time"
 )
 
 func init() {
 	for {
 		fmt.Printf("PG_URL => %v \n", os.Getenv("PG_URL"))
-		dsn := os.Getenv("PG_URL")
-		db, dbErr := gorm.Open(postgres.Open(dsn), &gorm.Config{})
-		if dbErr != nil {
-			time.Sleep(3*time.Second)
-			continue
-		}
+		db := pq.GetConn()
 		model.Init(db)
 		break
 	}

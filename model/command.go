@@ -3,69 +3,52 @@ package model
 import (
 	"fmt"
 	"gorm.io/gorm"
-	"time"
+	"smart-home-backend/lib/pq/schema"
 )
 
 type ICommand interface {
-	Get() []Command
-	Save(input *Command) Command
-	UpdateOne(commandUuid string, command *Command) Command
-	Delete(commandUuid string) Command
+	Get() ([]schema.Command, error)
+	Save(input *schema.Command) (schema.Command, error)
+	UpdateOne(commandUuid string, command *schema.Command) (schema.Command, error)
+	Delete(commandUuid string) (schema.Command, error)
 }
 
 type MCommand struct{
 	db *gorm.DB
 }
 
-type Command struct {
-	Uuid string `json:"uuid"`
-	CreateAt time.Time `json:"createAt"`
-	UpdateAt time.Time `json:"updateAt"`
-	Url string `json:"url"`
-}
-
-var AllCommand []Command = []Command{{
-	"bbbad37f-c6cd-47f7-907d-add1c4045559",
-	time.Now(),
-	time.Now(),
-	"http://example.com",
-},{
-	"bbbad37f-c6cd-47f7-907d-add1c4045558",
-	time.Now(),
-	time.Now(),
-	"http://example2.com",
-}}
-
-func NewOriginCommand(_db *gorm.DB) *MCommand {
+func NewOriginCommand(_db *gorm.DB) ICommand {
 	output := new(MCommand)
 	output.db = _db
 	return output
 }
 
-func NewCommand() *MCommand {
+func NewCommand() ICommand {
 	return NewOriginCommand(db)
 }
 
-func (c *MCommand) Get() []Command {
-	return AllCommand
+func (c *MCommand) Get() (Commands []schema.Command, err error) {
+	err = c.db.Model(schema.Command{}).Find(&Commands).Error
+	return
 }
 
-func (c *MCommand) Save(input *Command) Command {
-	return *input
+func (c *MCommand) Save(input *schema.Command) (schema.Command, error) {
+
+	return *input, nil
 }
 
-func (c *MCommand) UpdateOne(commandUuid string, command *Command) Command {
-	output := new(Command)
-	for _, command := range AllCommand {
+func (c *MCommand) UpdateOne(commandUuid string, command *schema.Command) (schema.Command, error) {
+	output := new(schema.Command)
+	for _, command := range schema.AllCommand {
 		if commandUuid == command.Uuid {
 			output = &command
 		}
 	}
-	return *output
+	return *output, nil
 }
 
-func (c *MCommand) Delete(commandUuid string) Command {
+func (c *MCommand) Delete(commandUuid string) (schema.Command, error) {
 	fmt.Println("Delete uuid", commandUuid)
-	return Command{}
+	return schema.Command{}, nil
 }
 

@@ -7,10 +7,10 @@ import (
 )
 
 type IRequest interface {
-	Get() []Request
-	Save(input *Request) Request
-	Update(requestUuid string, input *Request) Request
-	Delete(commandUuid string) Request
+	Get() (requests []Request, err error)
+	Save(input *Request) (Request, error)
+	Update(requestUuid string, input *Request) (Request, error)
+	Delete(commandUuid string) error
 }
 
 type MRequest struct {
@@ -40,44 +40,39 @@ var AllRequest []Request = []Request{{
 	"Request 2",
 }}
 
-func NewOriginRequest(_db *gorm.DB) *MRequest {
+func NewOriginRequest(_db *gorm.DB) IRequest {
 	output := new(MRequest)
 	output.db = _db
 	return output
 }
 
-func NewRequest() *MRequest {
+func NewRequest() IRequest {
 	return NewOriginRequest(db)
 }
 
 func (r *MRequest) Get() (requests []Request, err error) {
-	if findErr := r.db.Find(&requests).Error; findErr != nil {
-		err = findErr
-		return
-	}
+	err = r.db.Find(&requests).Error
 	return
 }
 
-func (r *MRequest) Save(input *Request) Request {
-	return *input
+func (r *MRequest) Save(input *Request) (Request, error) {
+	err := r.db.Save(input).Error
+	return *input, err
 }
 
-func (r *MRequest) Update(requestUuid string, input *Request) Request {
-	output := new(Request)
-	for _, request := range AllRequest {
-		if requestUuid == request.Uuid {
-			output.Uuid = request.Uuid
-			output.CreateAt = request.CreateAt
-			output.Name = input.Name
-			output.UpdateAt = time.Now()
-			return *output
-		}
+func (r *MRequest) Update(requestUuid string, input *Request) (Request, error) {
+	err := r.db.Model(&Request{}).
+		Updates(input).
+		Where("uuid = ?", requestUuid).Error
+	if err != nil {
+		return Request{}, err
 	}
-	return Request{}
+	return Request{}, nil
 }
 
-func (r *MRequest) Delete(commandUuid string) Request {
+func (r *MRequest) Delete(commandUuid string) error {
 	fmt.Println("Delete uuid", commandUuid)
-	return Request{}
+	err := r.db.Where("uuid = ?", commandUuid).Delete(&Request{}).Error
+	return err
 }
 
