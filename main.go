@@ -6,7 +6,8 @@ import (
 	"github.com/labstack/echo/v4"
 	"net/http"
 	"os"
-	"smart-home-backend/lib/pq"
+	"smart-home-backend/lib/pg"
+	"smart-home-backend/middleware"
 	"smart-home-backend/model"
 	"smart-home-backend/route"
 )
@@ -14,7 +15,7 @@ import (
 func init() {
 	for {
 		fmt.Printf("PG_URL => %v \n", os.Getenv("PG_URL"))
-		db := pq.GetConn()
+		db := pg.GetConn()
 		model.Init(db)
 		break
 	}
@@ -23,7 +24,7 @@ func init() {
 func main() {
 	e := echo.New()
 	v1Route := route.NewVersion1()
-
+	e.HTTPErrorHandler = middleware.CustomHTTPErrorHandler
 	v1Route.SetRoute(e.Group("/v1"))
 
 	e.GET("/", func(c echo.Context) error {

@@ -9,14 +9,6 @@ type Command struct {
 	Url      string    `json:"url"`
 }
 
-var AllCommand []Command = []Command{{
-	"bbbad37f-c6cd-47f7-907d-add1c4045559",
-	time.Now(),
-	time.Now(),
-	"http://example.com",
-}, {
-	"bbbad37f-c6cd-47f7-907d-add1c4045558",
-	time.Now(),
-	time.Now(),
-	"http://example2.com",
-}}
+func (Command) TableName() string {
+	return "commands"
+}

@@ -4,7 +4,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"net/http"
-	"smart-home-backend/lib/pq/schema"
+	"smart-home-backend/lib/pg/schema"
 	"smart-home-backend/model"
 	"time"
 )
@@ -12,7 +12,10 @@ import (
 func (v *Version1) GetCommands(ctx echo.Context) error {
 	var output []schema.Command
 	command := model.NewCommand()
-	output, _ = command.Get()
+	output, getErr := command.Get()
+	if getErr != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, getErr)
+	}
 	return ctx.JSON(http.StatusOK, HttpSuccessResponse{
 		Status: "success",
 		Data: struct {
@@ -27,16 +30,19 @@ func (v *Version1) CreateCommand(ctx echo.Context) error {
 	command := model.NewCommand()
 	input := new(schema.Command)
 	if err := ctx.Bind(input); err != nil {
-		return ctx.String(http.StatusBadRequest, "Fail to Bind Data")
+		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	_uuid, uuidErr := uuid.NewRandom()
 	if uuidErr != nil {
-		return ctx.String(http.StatusInternalServerError, "Fail to generate uuid")
+		return echo.NewHTTPError(http.StatusInternalServerError, uuidErr)
 	}
 	input.Uuid = _uuid.String()
 	input.CreateAt = time.Now()
 	input.UpdateAt = time.Now()
-	result, _ := command.Save(input)
+	result, saveErr := command.Save(input)
+	if saveErr != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, saveErr)
+	}
 	return ctx.JSON(http.StatusOK, HttpSuccessResponse{
 		Status: "success",
 		Data: struct {
@@ -49,10 +55,14 @@ func (v *Version1) UpdateCommandByUUID(ctx echo.Context) error {
 	command := model.NewCommand()
 	input := new(schema.Command)
 	if err := ctx.Bind(input); err != nil {
-		return ctx.String(http.StatusBadRequest, "Fail to Bind Data")
+		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	commandUuid := ctx.Param("uuid")
-	result, _ := command.UpdateOne(commandUuid, input)
+	result, updateErr := command.UpdateOne(commandUuid, input)
+	if updateErr != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, updateErr)
+	}
+
 	return ctx.JSON(http.StatusOK, HttpSuccessResponse{
 		Status: "success",
 		Data: struct {
@@ -66,10 +76,12 @@ func (v *Version1) UpdateCommandByUUID(ctx echo.Context) error {
 func (v *Version1) DeleteCommandByUUID(ctx echo.Context) error {
 	command := model.NewCommand()
 	commandUuid := ctx.Param("uuid")
-	_, _ = command.Delete(commandUuid)
+	err := command.Delete(commandUuid)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err)
+	}
 	return ctx.JSON(http.StatusOK, HttpSuccessResponse{
 		Status: "success",
 		Data:   nil,
 	})
 }
-

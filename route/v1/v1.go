@@ -9,14 +9,6 @@ type HttpSuccessResponse struct {
 	Status string      `json:"status"`
 	Data   interface{} `json:"data"`
 }
-type HttpFailResponse struct {
-	Status string      `json:"status"`
-	Errors []HttpError `json:"errors"`
-}
-type HttpError struct {
-	Name string `json:"name"`
-	Reason string `json:"reason"`
-}
 
 type IRoute interface {
 	SetRoute(g *echo.Group)

@@ -1,4 +1,4 @@
-package pq
+package pg
 
 import (
 	"fmt"
@@ -17,14 +17,14 @@ func conn() (dbErr error) {
 }
 
 func GetConn() *gorm.DB {
-	for  {
+	for {
 		if db != nil {
 			return db
 		}
 		fmt.Println("fail to get db, connect db again")
 		if err := conn(); err != nil {
 			fmt.Printf("conn fail: %v\n", err.Error())
-			time.Sleep(3*time.Second)
+			time.Sleep(3 * time.Second)
 		}
 	}
 }

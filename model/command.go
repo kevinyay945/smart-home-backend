@@ -1,19 +1,18 @@
 package model
 
 import (
-	"fmt"
 	"gorm.io/gorm"
-	"smart-home-backend/lib/pq/schema"
+	"smart-home-backend/lib/pg/schema"
 )
 
 type ICommand interface {
 	Get() ([]schema.Command, error)
 	Save(input *schema.Command) (schema.Command, error)
 	UpdateOne(commandUuid string, command *schema.Command) (schema.Command, error)
-	Delete(commandUuid string) (schema.Command, error)
+	Delete(commandUuid string) error
 }
 
-type MCommand struct{
+type MCommand struct {
 	db *gorm.DB
 }
 
@@ -33,22 +32,18 @@ func (c *MCommand) Get() (Commands []schema.Command, err error) {
 }
 
 func (c *MCommand) Save(input *schema.Command) (schema.Command, error) {
-
-	return *input, nil
+	err := c.db.Save(input).Error
+	return *input, err
 }
 
 func (c *MCommand) UpdateOne(commandUuid string, command *schema.Command) (schema.Command, error) {
-	output := new(schema.Command)
-	for _, command := range schema.AllCommand {
-		if commandUuid == command.Uuid {
-			output = &command
-		}
-	}
-	return *output, nil
+	err := c.db.Model(&schema.Command{}).
+		Updates(command).
+		Where("uuid = ?", commandUuid).Error
+	return *command, err
 }
 
-func (c *MCommand) Delete(commandUuid string) (schema.Command, error) {
-	fmt.Println("Delete uuid", commandUuid)
-	return schema.Command{}, nil
+func (c *MCommand) Delete(commandUuid string) error {
+	err := c.db.Model(&schema.Command{}).Delete("uuid = ?", commandUuid).Error
+	return err
 }
-

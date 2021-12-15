@@ -4,8 +4,8 @@ import (
 	"github.com/DATA-DOG/go-sqlmock"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"smart-home-backend/lib/pg"
 )
 
 var _ = Describe("request model", func() {
@@ -14,7 +14,7 @@ var _ = Describe("request model", func() {
 	var gdb *gorm.DB
 
 	BeforeEach(func() {
-		gdb, mock = mockGorm()
+		gdb, mock = pg.MockGorm()
 
 		r = &MRequest{db: gdb}
 	})
@@ -30,13 +30,3 @@ var _ = Describe("request model", func() {
 		Expect(err).ShouldNot(HaveOccurred())
 	})
 })
-
-func mockGorm() (*gorm.DB, sqlmock.Sqlmock) {
-	_db, mock, err := sqlmock.New() // mock sql.DB
-	Expect(err).ShouldNot(HaveOccurred())
-	gdb, err := gorm.Open(postgres.New(postgres.Config{
-		Conn: _db,
-	}), &gorm.Config{})
-	Expect(err).ShouldNot(HaveOccurred())
-	return gdb, mock
-}
