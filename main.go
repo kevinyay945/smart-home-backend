@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/go-playground/validator/v10"
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/labstack/echo/v4"
 	"net/http"
@@ -21,8 +22,21 @@ func init() {
 	}
 }
 
+type CustomValidator struct {
+	validator *validator.Validate
+}
+
+func (cv *CustomValidator) Validate(i interface{}) error {
+	if err := cv.validator.Struct(i); err != nil {
+		// Optionally, you could return the error to give each route more control over the status code
+		return echo.NewHTTPError(http.StatusBadRequest, err)
+	}
+	return nil
+}
+
 func main() {
 	e := echo.New()
+	e.Validator = &CustomValidator{validator: validator.New()}
 	v1Route := route.NewVersion1()
 	e.HTTPErrorHandler = middleware.CustomHTTPErrorHandler
 	v1Route.SetRoute(e.Group("/v1"))

@@ -38,6 +38,9 @@ func (v *Version1) CreateRequest(ctx echo.Context) error {
 	input.Uuid = _uuid.String()
 	input.CreateAt = time.Now()
 	input.UpdateAt = time.Now()
+	if err := ctx.Validate(input); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err)
+	}
 	result, _ := request.Save(input)
 	return ctx.JSON(http.StatusOK, HttpSuccessResponse{
 		Status: "success",
@@ -51,6 +54,9 @@ func (v *Version1) UpdateRequestByUUID(ctx echo.Context) error {
 	request := model.NewRequest()
 	input := new(schema.Request)
 	if err := ctx.Bind(input); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err)
+	}
+	if err := ctx.Validate(input); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	requestUuid := ctx.Param("uuid")

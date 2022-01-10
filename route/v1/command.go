@@ -39,6 +39,9 @@ func (v *Version1) CreateCommand(ctx echo.Context) error {
 	input.Uuid = _uuid.String()
 	input.CreateAt = time.Now()
 	input.UpdateAt = time.Now()
+	if err := ctx.Validate(input); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err)
+	}
 	result, saveErr := command.Save(input)
 	if saveErr != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, saveErr)
@@ -55,6 +58,9 @@ func (v *Version1) UpdateCommandByUUID(ctx echo.Context) error {
 	command := model.NewCommand()
 	input := new(schema.Command)
 	if err := ctx.Bind(input); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err)
+	}
+	if err := ctx.Validate(input); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	commandUuid := ctx.Param("uuid")
