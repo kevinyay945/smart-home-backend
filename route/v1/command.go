@@ -9,10 +9,13 @@ import (
 	"time"
 )
 
-func (v *Version1) GetCommands(ctx echo.Context) error {
+type commandRoute struct {
+	Command model.ICommand
+}
+
+func (r *commandRoute) GetCommands(ctx echo.Context) error {
 	var output []schema.Command
-	command := model.NewCommand()
-	output, getErr := command.Get()
+	output, getErr := r.Command.Get()
 	if getErr != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, getErr)
 	}
@@ -26,8 +29,7 @@ func (v *Version1) GetCommands(ctx echo.Context) error {
 	})
 }
 
-func (v *Version1) CreateCommand(ctx echo.Context) error {
-	command := model.NewCommand()
+func (r *commandRoute) CreateCommand(ctx echo.Context) error {
 	input := new(schema.Command)
 	if err := ctx.Bind(input); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
@@ -42,7 +44,7 @@ func (v *Version1) CreateCommand(ctx echo.Context) error {
 	if err := ctx.Validate(input); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
-	result, saveErr := command.Save(input)
+	result, saveErr := r.Command.Save(input)
 	if saveErr != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, saveErr)
 	}
@@ -54,8 +56,7 @@ func (v *Version1) CreateCommand(ctx echo.Context) error {
 	})
 }
 
-func (v *Version1) UpdateCommandByUUID(ctx echo.Context) error {
-	command := model.NewCommand()
+func (r *commandRoute) UpdateCommandByUUID(ctx echo.Context) error {
 	input := new(schema.Command)
 	if err := ctx.Bind(input); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
@@ -64,7 +65,7 @@ func (v *Version1) UpdateCommandByUUID(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	commandUuid := ctx.Param("uuid")
-	result, updateErr := command.UpdateOne(commandUuid, input)
+	result, updateErr := r.Command.UpdateOne(commandUuid, input)
 	if updateErr != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, updateErr)
 	}
@@ -79,10 +80,9 @@ func (v *Version1) UpdateCommandByUUID(ctx echo.Context) error {
 	})
 }
 
-func (v *Version1) DeleteCommandByUUID(ctx echo.Context) error {
-	command := model.NewCommand()
+func (r *commandRoute) DeleteCommandByUUID(ctx echo.Context) error {
 	commandUuid := ctx.Param("uuid")
-	err := command.Delete(commandUuid)
+	err := r.Command.Delete(commandUuid)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}

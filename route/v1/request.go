@@ -9,9 +9,12 @@ import (
 	"time"
 )
 
-func (v *Version1) GetRequests(ctx echo.Context) error {
-	request := model.NewRequest()
-	result, getErr := request.Get()
+type requestRoute struct {
+	Request model.IRequest
+}
+
+func (r *requestRoute) GetRequests(ctx echo.Context) error {
+	result, getErr := r.Request.Get()
 	if getErr != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, getErr)
 	}
@@ -25,8 +28,7 @@ func (v *Version1) GetRequests(ctx echo.Context) error {
 	})
 }
 
-func (v *Version1) CreateRequest(ctx echo.Context) error {
-	request := model.NewRequest()
+func (r *requestRoute) CreateRequest(ctx echo.Context) error {
 	input := new(schema.Request)
 	if err := ctx.Bind(input); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
@@ -41,7 +43,7 @@ func (v *Version1) CreateRequest(ctx echo.Context) error {
 	if err := ctx.Validate(input); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
-	result, _ := request.Save(input)
+	result, _ := r.Request.Save(input)
 	return ctx.JSON(http.StatusOK, HttpSuccessResponse{
 		Status: "success",
 		Data: struct {
@@ -50,8 +52,7 @@ func (v *Version1) CreateRequest(ctx echo.Context) error {
 	})
 }
 
-func (v *Version1) UpdateRequestByUUID(ctx echo.Context) error {
-	request := model.NewRequest()
+func (r *requestRoute) UpdateRequestByUUID(ctx echo.Context) error {
 	input := new(schema.Request)
 	if err := ctx.Bind(input); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
@@ -60,7 +61,7 @@ func (v *Version1) UpdateRequestByUUID(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	requestUuid := ctx.Param("uuid")
-	result, _ := request.Update(requestUuid, input)
+	result, _ := r.Request.Update(requestUuid, input)
 	return ctx.JSON(http.StatusOK, HttpSuccessResponse{
 		Status: "success",
 		Data: struct {
@@ -71,10 +72,9 @@ func (v *Version1) UpdateRequestByUUID(ctx echo.Context) error {
 	})
 }
 
-func (v *Version1) DeleteRequestByUUID(ctx echo.Context) error {
-	request := model.NewRequest()
+func (r *requestRoute) DeleteRequestByUUID(ctx echo.Context) error {
 	commandUuid := ctx.Param("uuid")
-	err := request.Delete(commandUuid)
+	err := r.Request.Delete(commandUuid)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}

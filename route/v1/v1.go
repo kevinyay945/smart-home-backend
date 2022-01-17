@@ -27,12 +27,24 @@ func New(input Version1) IRoute {
 }
 
 func (v *Version1) SetRoute(g *echo.Group) {
-	g.GET("/commands", v.GetCommands)
-	g.POST("/commands", v.CreateCommand)
-	g.PUT("/commands/:uuid", v.UpdateCommandByUUID)
-	g.DELETE("/commands/:uuid", v.DeleteCommandByUUID)
-	g.GET("/requests", v.GetRequests)
-	g.POST("/requests", v.CreateRequest)
-	g.PUT("/requests/:uuid", v.UpdateRequestByUUID)
-	g.DELETE("/requests/:uuid", v.DeleteRequestByUUID)
+	command := g.Group("/commands")
+	{
+		route := &commandRoute{
+			Command: v.Command,
+		}
+		command.GET("", route.GetCommands)
+		command.POST("", route.CreateCommand)
+		command.PUT("/:uuid", route.UpdateCommandByUUID)
+		command.DELETE("/:uuid", route.DeleteCommandByUUID)
+	}
+	request := g.Group("/requests")
+	{
+		route := &requestRoute{
+			Request: v.Request,
+		}
+		request.GET("", route.GetRequests)
+		request.POST("", route.CreateRequest)
+		request.PUT("/:uuid", route.UpdateRequestByUUID)
+		request.DELETE("/:uuid", route.DeleteRequestByUUID)
+	}
 }

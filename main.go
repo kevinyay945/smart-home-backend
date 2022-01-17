@@ -5,6 +5,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/labstack/echo/v4"
+	echoMiddleware "github.com/labstack/echo/v4/middleware"
 	"net/http"
 	"os"
 	"smart-home-backend/lib/pg"
@@ -36,6 +37,21 @@ func (cv *CustomValidator) Validate(i interface{}) error {
 
 func main() {
 	e := echo.New()
+
+	e.Use(echoMiddleware.LoggerWithConfig(echoMiddleware.LoggerConfig{
+		Format: "${time_custom} [ ${method} ] STATUS: ${status}, LATENCY: ${latency_human} URI: ${uri} \n",
+		Skipper: func(c echo.Context) bool {
+			// dont print root request
+			if c.Request().RequestURI == "/" {
+				return true
+			}
+			// else print it out
+			return false
+		},
+		CustomTimeFormat: "2006/01/02 15:04:05",
+	}))
+	e.Use(echoMiddleware.Recover())
+
 	e.Validator = &CustomValidator{validator: validator.New()}
 	v1Route := route.NewVersion1()
 	e.HTTPErrorHandler = middleware.CustomHTTPErrorHandler
