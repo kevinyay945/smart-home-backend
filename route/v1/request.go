@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"fmt"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"net/http"
@@ -15,8 +16,10 @@ type requestRoute struct {
 
 func (r *requestRoute) GetRequests(ctx echo.Context) error {
 	result, getErr := r.Request.Get()
+	fmt.Printf("Get Requests Error => %v", getErr.Error())
 	if getErr != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, getErr)
+		fmt.Println("Get Requests Error")
+		return echo.NewHTTPError(http.StatusInternalServerError, getErr)
 	}
 	return ctx.JSON(http.StatusOK, HttpSuccessResponse{
 		Status: "success",
