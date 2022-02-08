@@ -5,6 +5,7 @@ import (
 	"smart-home-backend/lib/pg/schema"
 )
 
+//go:generate mockgen -destination=mock/command.go -package=modelMock . ICommand
 type ICommand interface {
 	Get() ([]schema.Command, error)
 	Save(input *schema.Command) (schema.Command, error)

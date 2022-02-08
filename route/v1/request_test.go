@@ -8,17 +8,17 @@ import (
 	. "github.com/onsi/gomega"
 	"net/http"
 	"net/http/httptest"
-	"smart-home-backend/model"
+	modelMock "smart-home-backend/model/mock"
 )
 
 var _ = Describe("Request", func() {
 	var mockCtrl *gomock.Controller
-	var mockRequestModel *model.MockIRequest
+	var mockRequestModel *modelMock.MockIRequest
 	var e *echo.Echo
 	BeforeEach(func() {
 		e = echo.New()
 		mockCtrl = gomock.NewController(GinkgoT())
-		mockRequestModel = model.NewMockIRequest(mockCtrl)
+		mockRequestModel = modelMock.NewMockIRequest(mockCtrl)
 	})
 	AfterEach(func() {
 		mockCtrl.Finish()

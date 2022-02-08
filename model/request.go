@@ -6,6 +6,7 @@ import (
 	"smart-home-backend/lib/pg/schema"
 )
 
+//go:generate mockgen -destination=mock/request.go -package=modelMock . IRequest
 type IRequest interface {
 	Get() (requests []schema.Request, err error)
 	Save(input *schema.Request) (schema.Request, error)
