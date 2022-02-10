@@ -12,6 +12,7 @@ import (
 	"smart-home-backend/middleware"
 	"smart-home-backend/model"
 	"smart-home-backend/route"
+	"smart-home-backend/utils"
 )
 
 func init() {
@@ -21,18 +22,6 @@ func init() {
 		model.Init(db)
 		break
 	}
-}
-
-type CustomValidator struct {
-	validator *validator.Validate
-}
-
-func (cv *CustomValidator) Validate(i interface{}) error {
-	if err := cv.validator.Struct(i); err != nil {
-		// Optionally, you could return the error to give each route more control over the status code
-		return echo.NewHTTPError(http.StatusBadRequest, err)
-	}
-	return nil
 }
 
 func main() {
@@ -52,7 +41,7 @@ func main() {
 	}))
 	e.Use(echoMiddleware.Recover())
 
-	e.Validator = &CustomValidator{validator: validator.New()}
+	e.Validator = &utils.CustomValidator{Validator: validator.New()}
 	v1Route := route.NewVersion1()
 	e.HTTPErrorHandler = middleware.CustomHTTPErrorHandler
 	v1Route.SetRoute(e.Group("/v1"))

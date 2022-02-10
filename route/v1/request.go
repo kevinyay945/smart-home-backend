@@ -10,13 +10,17 @@ import (
 	"time"
 )
 
+var (
+	newUuidV4 = uuid.NewRandom
+	getNow    = time.Now
+)
+
 type requestRoute struct {
 	Request model.IRequest
 }
 
 func (r *requestRoute) GetRequests(ctx echo.Context) error {
 	result, getErr := r.Request.Get()
-	fmt.Printf("Get Requests Error => %v", getErr.Error())
 	if getErr != nil {
 		fmt.Println("Get Requests Error")
 		return echo.NewHTTPError(http.StatusInternalServerError, getErr)
@@ -36,22 +40,24 @@ func (r *requestRoute) CreateRequest(ctx echo.Context) error {
 	if err := ctx.Bind(input); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
-	_uuid, uuidErr := uuid.NewRandom()
+	_uuid, uuidErr := newUuidV4()
 	if uuidErr != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Fail to generate uuid")
 	}
 	input.Uuid = _uuid.String()
-	input.CreateAt = time.Now()
-	input.UpdateAt = time.Now()
+	input.CreateAt = getNow()
+	input.UpdateAt = getNow()
 	if err := ctx.Validate(input); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		return err
 	}
 	result, _ := r.Request.Save(input)
-	return ctx.JSON(http.StatusOK, HttpSuccessResponse{
+	return ctx.JSON(http.StatusCreated, HttpSuccessResponse{
 		Status: "success",
 		Data: struct {
 			Request schema.Request `json:"request"`
-		}{Request: result},
+		}{
+			Request: result,
+		},
 	})
 }
 
