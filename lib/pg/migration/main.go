@@ -16,7 +16,6 @@ var dsn string
 func init() {
 	_ = godotenv.Load(".env")
 	dsn = os.Getenv("PG_URL")
-	fmt.Println("dsn", dsn)
 }
 
 func main() {
